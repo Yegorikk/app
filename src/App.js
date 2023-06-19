@@ -48,64 +48,35 @@ function App() {
         case 'CE':
           clearLastChar();
           break;
-          break;
-        default:
-          break;
       }
-    }, [enterNumber]);
+    }, []);
 
   const calculateResult = useCallback(
     () => {
       if (number1 !== null && number2 !== null && sign !== null) {
-        let result = 0;
-        switch (sign) {
-          case '+':
-            result = parseFloat(number1) + parseFloat(number2);
-            break;
-          case '-':
-            result = parseFloat(number1) - parseFloat(number2);
-            break;
-          case '*':
-            result = parseFloat(number1) * parseFloat(number2);
-            break;
-          case '/':
-            result = parseFloat(number1) / parseFloat(number2);
-            break;
-          default:
-            break;
-        }
+        let result = sign === '+' ? parseFloat(number1) + parseFloat(number2) : sign === '-' ? parseFloat(number1) - parseFloat(number2) : sign === '*' ? parseFloat(number1) * parseFloat(number2) : parseFloat(number1) / parseFloat(number2);
         setNumber1(result.toString());
         setNumber2(null);
       }
-    }, [enterNumber]);
+    }, [number1, sign, number2]);
 
   const resetCalculator = useCallback(
     () => {
       setNumber1(null);
       setSign(null);
       setNumber2(null);
-    }, [enterNumber]);
+    }, []);
 
   const clearLastChar = useCallback(
     () => {
-      if (sign === null) {
-        if (number1 === null) {
-          return;
-        } else if (number1.length === 1) {
-          setNumber1(null);
-        } else {
-          setNumber1(number1.slice(0, -1));
-        }
-      } else {
-        if (number2 === null) {
+      const [number, setNumber] = sign === null ? [number1, setNumber1] : [number2, setNumber2];
+      if (number !== null) {
+        setNumber(number.slice(0, -1));
+        if (number.length === 0 && sign !== null){
           setSign(null);
-        } else if (number2.length === 1) {
-          setNumber2(null);
-        } else {
-          setNumber2(number2.slice(0, -1));
         }
       }
-    }, [enterNumber]);
+    }, [number1, sign, number2]);
 
   const calculatorText = useMemo(() => {
     let text = '';
