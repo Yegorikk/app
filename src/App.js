@@ -86,14 +86,26 @@ function App() {
     setNumber2(null);
   },[enterNumber]);
 
-  const clearLastChar = useCallback(
+const clearLastChar = useCallback(
     () => {
-      if (sign === null) {
-        number1 !== null && setNumber1(number1.length === 1 ? null : number1.slice(0, -1));
+    if (sign === null) {
+      if (number1 === null) {
+        return;
+      } else if (number1.length === 1) {
+        setNumber1(null);
       } else {
-        number2 !== null && setNumber2(number2.length === 1 ? null : number2.slice(0, -1));
+        setNumber1(number1.slice(0, -1));
       }
-    }, [sign, number1, number2]);
+    } else {
+      if (number2 === null) {
+        setSign(null);
+      } else if (number2.length === 1) {
+        setNumber2(null);
+      } else {
+        setNumber2(number2.slice(0, -1));
+      }
+    }
+  },[enterNumber]);
 
   const calculatorText = useMemo(() => {
     let text = '';
