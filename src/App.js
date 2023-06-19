@@ -19,38 +19,6 @@ function App() {
     setNumber(newOut);
   };
 
-  const enterOperation = useCallback(
-    (value) => {
-      switch (value) {
-        case '+':
-          setSign('+');
-          calculateResult();
-          break;
-        case '-':
-          setSign('-');
-          calculateResult();
-          break;
-        case '*':
-          setSign('*');
-          calculateResult();
-          break;
-        case '/':
-          setSign('/');
-          calculateResult();
-          break;
-        case '=':
-          calculateResult();
-          setSign(null);
-          break;
-        case 'C':
-          resetCalculator();
-          break;
-        case 'CE':
-          clearLastChar();
-          break;
-      }
-    }, []);
-
   const calculateResult = useCallback(
     () => {
       if (number1 !== null && number2 !== null && sign !== null) {
@@ -77,6 +45,30 @@ function App() {
         }
       }
     }, [number1, sign, number2]);
+
+    const operations = {
+      '+': () => setSign('+'),
+      '-': () => setSign('-'),
+      '*': () => setSign('*'),
+      '/': () => setSign('/'),
+      '=': () => {
+        calculateResult();
+        setSign(null);
+      },
+      'C': resetCalculator,
+      'CE': clearLastChar,
+    };
+
+    const enterOperation = useCallback(
+      (value) => {
+        const operation = operations[value];
+        if (operation) {
+          operation();
+          calculateResult();
+        }
+      },
+      [operations, calculateResult]
+    );
 
   const calculatorText = useMemo(() => {
     let text = '';
