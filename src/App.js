@@ -40,34 +40,29 @@ function App() {
       const [number, setNumber] = sign === null ? [number1, setNumber1] : [number2, setNumber2];
       if (number !== null) {
         setNumber(number.slice(0, -1));
-        if (number.length === 0 && sign !== null){
+        if (number.length === 0 && sign !== null) {
           setSign(null);
         }
       }
     }, [number1, sign, number2]);
 
-    const operations = {
-      '+': () => setSign('+'),
-      '-': () => setSign('-'),
-      '*': () => setSign('*'),
-      '/': () => setSign('/'),
-      '=': () => {
-        calculateResult();
-        setSign(null);
-      },
-      'C': resetCalculator,
-      'CE': clearLastChar,
-    };
-
     const enterOperation = useCallback(
       (value) => {
+        const operations = {
+          '+': () => {setSign('+'); calculateResult();},
+          '-': () => {setSign('-'); calculateResult();},
+          '*': () => {setSign('*'); calculateResult();},
+          '/': () => {setSign('/'); calculateResult();},
+          '=': () => {setSign(null); calculateResult();},
+          'C': resetCalculator,
+          'CE': clearLastChar,
+        };
         const operation = operations[value];
         if (operation) {
           operation();
-          calculateResult();
         }
       },
-      [operations, calculateResult]
+      [calculateResult, resetCalculator, clearLastChar]
     );
 
   const calculatorText = useMemo(() => {
