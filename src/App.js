@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import store from './store';
 import './App.css'
 
@@ -8,77 +8,145 @@ function Button(props) {
   >{props.val}</button>
 }
 
-class App extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      out: "0"
-    }
-    this.refOutput = React.createRef()
-  }
+function App() {
+  const [number1, setNumber1] = useState(null);
+  const [sign, setSign] = useState(null);
+  const [number2, setNumber2] = useState(null);
 
-  enterNumber(value) {
-    let currentValue = value;
-    let output = this.refOutput.current
-    this.setState({
-      out: currentValue
-    })
-    if (output.value === '0') { output.value = '' }
-    output.value += currentValue
-  }
+  const enterNumber = (value) => {
+    const [number, setNumber] = sign === null ? [number1, setNumber1] : [number2, setNumber2];
+    let newOut = number === null ? value : number + value;
+    setNumber(newOut);
+  };
 
-  enterOperation(value) {
-    let currentValue = value;
-    let output = this.refOutput.current
-    if (value === '+' || value === '-' || value === '*' || value === '/') { output.value += currentValue }
-    if (value === 'C') { output.value = '0' }
-    if (value === 'CE') {
-      output.value = output.value.substring(0, output.value.length - 1)
-      if (output.value === '') { output.value = '0' }
+  const enterOperation = useCallback(
+  (value) => {
+    switch (value) {
+      case '+':
+        setSign('+');
+        calculateResult();
+        break;
+      case '-':
+        setSign('-');
+        calculateResult();
+        break;
+      case '*':
+        setSign('*');
+        calculateResult();
+        break;
+      case '/':
+        setSign('/');
+        calculateResult();
+        break;
+      case '=':
+        calculateResult();
+        setSign(null);
+        break;
+      case 'C':
+        resetCalculator();
+        break;
+      case 'CE':
+        clearLastChar();
+        break;
+        break;
+      default:
+        break;
     }
-    if (value === '=') {
-      try {
-        output.value = eval(output.value)
+  },[enterNumber]);
+
+  const calculateResult = useCallback(
+    () => {
+    if (number1 !== null && number2 !== null && sign !== null) {
+      let result = 0;
+      switch (sign) {
+        case '+':
+          result = parseFloat(number1) + parseFloat(number2);
+          break;
+        case '-':
+          result = parseFloat(number1) - parseFloat(number2);
+          break;
+        case '*':
+          result = parseFloat(number1) * parseFloat(number2);
+          break;
+        case '/':
+          result = parseFloat(number1) / parseFloat(number2);
+          break;
+        default:
+          break;
       }
-      catch {
-        output.value = "Incorrect data"
-        setTimeout(() => {
-          output.value = '0'
-        }, 2000)
+      setNumber1(result.toString());
+      setNumber2(null);
+    }
+  },[enterNumber]);
+
+  const resetCalculator = useCallback(
+    () => {
+    setNumber1(null);
+    setSign(null);
+    setNumber2(null);
+  },[enterNumber]);
+
+  const clearLastChar = useCallback(
+    () => {
+    if (sign === null) {
+      if (number1 === null) {
+        return;
+      } else if (number1.length === 1) {
+        setNumber1(null);
+      } else {
+        setNumber1(number1.slice(0, -1));
+      }
+    } else {
+      if (number2 === null) {
+        setSign(null);
+      } else if (number2.length === 1) {
+        setNumber2(null);
+      } else {
+        setNumber2(number2.slice(0, -1));
       }
     }
-  }
+  },[enterNumber]);
 
-  render() {
-    return (
-      <div className="container">
-        <div className="output">
-          <input ref={this.refOutput} type="text" defaultValue={this.state.out} />
+  const calculatorText = useMemo(() => {
+    let text = '';
+    text += number1 || 'Enter equation'
+    if (sign) {
+      text += sign
+      text += number2 || ''
+    }
+    return text;
+  }, [number1, sign, number2])
+
+  return (
+    <div className="container">
+      <div className="output">
+        <input type="text" value={calculatorText} readOnly />
+      </div>
+      <div className='buttons-hold'>
+        <div className="buttons">
+          {store.buttons.map(item => <Button
+            key={item.val}
+            trigger={enterNumber}
+            val={item.val}
+          >{item.val}</Button>)}
         </div>
-        <div className='buttons-hold'>
-          <div className="buttons">
-            {store.buttons.map(item => <Button
-              key = {item.val}
-              trigger = {this.enterNumber.bind(this)}
-              val = {item.val}
-            >{item.val}</Button>)}
-          </div>
-          <div className="operations-column">
-            {store.operations_column.map(item => <button
-              key = {item.val}
-              onClick={() => { this.enterOperation(item.val) }}
-            >{item.val}</button>)}
-          </div>
-        </div>
-        <div className="operations-row">
-          {store.operations_row.map(item => <button
-            key = {item.val}
-            onClick={() => { this.enterOperation(item.val) }}
-          >{item.val}</button>)}
+        <div className="operations-column">
+          {store.operations_column.map(item => <Button
+            key={item.val}
+            trigger={enterOperation}
+            val={item.val}
+          >{item.val}</Button>)}
         </div>
       </div>
-    )
-  }
+      <div className="operations-row">
+        {store.operations_row.map(item => <Button
+          key={item.val}
+          trigger={enterOperation}
+          val={item.val}
+        >{item.val}</Button>)}
+      </div>
+    </div>
+  )
 }
 
 export default App
