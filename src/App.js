@@ -20,80 +20,92 @@ function App() {
   };
 
   const enterOperation = useCallback(
-  (value) => {
-    switch (value) {
-      case '+':
-        setSign('+');
-        calculateResult();
-        break;
-      case '-':
-        setSign('-');
-        calculateResult();
-        break;
-      case '*':
-        setSign('*');
-        calculateResult();
-        break;
-      case '/':
-        setSign('/');
-        calculateResult();
-        break;
-      case '=':
-        calculateResult();
-        setSign(null);
-        break;
-      case 'C':
-        resetCalculator();
-        break;
-      case 'CE':
-        clearLastChar();
-        break;
-        break;
-      default:
-        break;
-    }
-  },[enterNumber]);
-
-  const calculateResult = useCallback(
-    () => {
-    if (number1 !== null && number2 !== null && sign !== null) {
-      let result = 0;
-      switch (sign) {
+    (value) => {
+      switch (value) {
         case '+':
-          result = parseFloat(number1) + parseFloat(number2);
+          setSign('+');
+          calculateResult();
           break;
         case '-':
-          result = parseFloat(number1) - parseFloat(number2);
+          setSign('-');
+          calculateResult();
           break;
         case '*':
-          result = parseFloat(number1) * parseFloat(number2);
+          setSign('*');
+          calculateResult();
           break;
         case '/':
-          result = parseFloat(number1) / parseFloat(number2);
+          setSign('/');
+          calculateResult();
+          break;
+        case '=':
+          calculateResult();
+          setSign(null);
+          break;
+        case 'C':
+          resetCalculator();
+          break;
+        case 'CE':
+          clearLastChar();
+          break;
           break;
         default:
           break;
       }
-      setNumber1(result.toString());
-      setNumber2(null);
-    }
-  },[enterNumber]);
+    }, [enterNumber]);
+
+  const calculateResult = useCallback(
+    () => {
+      if (number1 !== null && number2 !== null && sign !== null) {
+        let result = 0;
+        switch (sign) {
+          case '+':
+            result = parseFloat(number1) + parseFloat(number2);
+            break;
+          case '-':
+            result = parseFloat(number1) - parseFloat(number2);
+            break;
+          case '*':
+            result = parseFloat(number1) * parseFloat(number2);
+            break;
+          case '/':
+            result = parseFloat(number1) / parseFloat(number2);
+            break;
+          default:
+            break;
+        }
+        setNumber1(result.toString());
+        setNumber2(null);
+      }
+    }, [enterNumber]);
 
   const resetCalculator = useCallback(
     () => {
-    setNumber1(null);
-    setSign(null);
-    setNumber2(null);
-  },[enterNumber]);
+      setNumber1(null);
+      setSign(null);
+      setNumber2(null);
+    }, [enterNumber]);
 
   const clearLastChar = useCallback(
     () => {
       if (sign === null) {
-        number1 !== null && setNumber1(number1.length === 1 ? null : number1.slice(0, -1));
+        if (number1 === null) {
+          return;
+        } else if (number1.length === 1) {
+          setNumber1(null);
+        } else {
+          setNumber1(number1.slice(0, -1));
+        }
       } else {
-        number2 !== null && setNumber2(number2.length === 1 ? null : number2.slice(0, -1));
+        if (number2 === null) {
+          setSign(null);
+        } else if (number2.length === 1) {
+          setNumber2(null);
+        } else {
+          setNumber2(number2.slice(0, -1));
+        }
       }
-    }, [sign, number1, number2]);
+    }, [enterNumber]);
 
   const calculatorText = useMemo(() => {
     let text = '';
